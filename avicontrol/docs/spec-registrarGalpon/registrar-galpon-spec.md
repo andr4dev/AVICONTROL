@@ -1,4 +1,4 @@
-# Feature Specification: Registrar galpón
+# Feature Specification: Registrar galpon
 
 **Created**: 2026-08-24
 
