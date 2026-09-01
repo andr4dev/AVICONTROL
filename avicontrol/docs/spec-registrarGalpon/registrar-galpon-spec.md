@@ -18,9 +18,7 @@ Como administrador de granja, quiero registrar un galpón indicando su nombre y 
    - **Given** el administradorintente ingresar un galpón
    - **When** ingresa un nombre válido y un aforo máximo entero positivo
    - **Then** el sistema crea el galpón con un UUID automático
-   - **And** establece la población actual en 0
-   - **And** establece la edad del lote en 0 días
-   - **And** establece el estado inicial en “Vacío”
+   - **And** establece el estado inicial en “Disponible”
    - **And** redirige al administrador a la lista de galpones
 
 2. **Scenario**: Registro con nombre duplicado
@@ -55,8 +53,7 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 1. **Scenario**: Galpón visible en la lista
    - **Given** el galpón fue registrado correctamente
    - **When** el sistema redirige a la lista de galpones
-   - **Then** el nuevo galpón aparece inmediatamente con su nombre, aforo máximo, población actual, edad del lote y estado
-
+   - **Then** el nuevo galpón aparece inmediatamente con su nombre.
 ## Edge Cases
 
 - **Nombre con espacios al inicio o al final**: El sistema debe eliminar los espacios sobrantes antes de validar y guardar el nombre.
@@ -83,13 +80,11 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 - **FR-005**: El sistema DEBE impedir el registro de nombres duplicados.
 - **FR-006**: El sistema DEBE mostrar mensajes de validación claros y específicos para cada campo.
 - **FR-007**: El sistema DEBE generar automáticamente un UUID único para cada galpón registrado.
-- **FR-008**: El sistema DEBE establecer la población actual en 0 al crear el galpón.
-- **FR-009**: El sistema DEBE establecer la edad del lote en 0 días al crear el galpón.
-- **FR-010**: El sistema DEBE establecer el estado inicial del galpón en “Vacío”.
+- **FR-010**: El sistema DEBE establecer el estado inicial del galpón en “Disponible”.
 - **FR-011**: El sistema DEBE guardar la información del galpón cuando todos los datos sean válidos.
 - **FR-012**: El sistema DEBE conservar los datos introducidos cuando ocurra un error durante el guardado.
 - **FR-013**: El sistema DEBE redirigir al administrador a la lista de galpones después de un registro exitoso.
-- **FR-014**: El sistema DEBE mostrar inmediatamente en la lista el nuevo galpón con su nombre, aforo máximo, población actual, edad del lote y estado.
+- **FR-014**: El sistema DEBE mostrar inmediatamente en la lista el nuevo galpón con su nombre, aforo máximo y estado.
 - **FR-015**: El sistema NO DEBE crear un registro si falla la generación del UUID o la persistencia de los datos.
 - **FR-016**: El sistema DEBE validar nuevamente la unicidad del nombre al momento de guardar para evitar duplicados por registros simultáneos.
 
@@ -101,9 +96,7 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
   - UUID único
   - Nombre
   - Aforo máximo
-  - Población actual
-  - Edad del lote
-  - Estado
+  - Estado(Disponible, vaciado sanitario, productivo, en cosecha, mantenimiento, aislamiento)
 
 - **Administrador de granja**: Usuario autorizado para registrar y administrar galpones.
 
@@ -113,8 +106,8 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 
 - **SC-001**: El 100 % de los galpones registrados correctamente debe aparecer inmediatamente en la lista de galpones.
 - **SC-002**: El 100 % de los galpones creados debe recibir un UUID único.
-- **SC-003**: El 100 % de los registros válidos debe guardarse con nombre, aforo máximo, población actual, edad del lote y estado.
-- **SC-004**: El 100 % de los nuevos galpones debe iniciar con población actual igual a 0, edad del lote igual a 0 días y estado “Vacío”.
+- **SC-003**: El 100 % de los registros válidos debe guardarse con nombre, aforo máximo y estado.
+- **SC-004**: El 100 % de los nuevos galpones debe iniciar con población actual igual a 0, edad del lote igual a 0 días y estado “Disponible”.
 - **SC-005**: El 100 % de los intentos con nombre vacío, aforo inválido o nombre duplicado debe rechazarse antes de crear el registro.
 - **SC-006**: El 100 % de los errores de validación debe mostrar un mensaje claro y específico para que el administrador pueda corregir el campo correspondiente.
 - **SC-007**: El 100 % de los errores durante el guardado debe conservar los datos ingresados para permitir un nuevo intento.
