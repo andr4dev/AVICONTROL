@@ -15,7 +15,7 @@ Como administrador de granja, quiero registrar un galpón indicando su nombre y 
 **Acceptance Scenarios**:
 
 1. **Scenario**: Registro exitoso
-   - **Given** el administradorintente ingresar un galpón
+   - **Given** el administrador intente ingresar un galpón
    - **When** ingresa un nombre válido y un aforo máximo entero positivo
    - **Then** el sistema crea el galpón con un UUID automático
    - **And** establece el estado inicial en “Disponible”
