@@ -132,10 +132,13 @@ Como administrador u operario de granja, quiero consultar las alertas sanitarias
   - Estado: Disponible, vaciado sanitario, productivo, en cosecha, mantenimiento o aislamiento
 
 - **Lote**: Grupo de aves que puede utilizarse para identificar el galpón afectado.
-  - UUID único
-  - Nombre único
-  - Estado o condición de lote activo
-  - UUID del galpón referenciado
+    - UUID único
+    - Nombre
+    - Población inicial
+    - Población actual
+    - Fecha de ingreso
+    - Costo total
+    - Llave foránea del galpón para el cual fue registrado
 
 - **Administrador u operario de granja**: Usuario autenticado autorizado para registrar y consultar alertas sanitarias.
 
