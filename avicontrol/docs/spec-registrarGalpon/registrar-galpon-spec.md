@@ -107,7 +107,7 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 - **SC-001**: El 100 % de los galpones registrados correctamente debe aparecer inmediatamente en la lista de galpones.
 - **SC-002**: El 100 % de los galpones creados debe recibir un UUID único.
 - **SC-003**: El 100 % de los registros válidos debe guardarse con nombre, aforo máximo y estado.
-- **SC-004**: El 100 % de los nuevos galpones debe iniciar con población actual igual a 0, edad del lote igual a 0 días y estado “Disponible”.
+- **SC-004**: El 100 % de los nuevos galpones debe iniciar con estado “Disponible”.
 - **SC-005**: El 100 % de los intentos con nombre vacío, aforo inválido o nombre duplicado debe rechazarse antes de crear el registro.
 - **SC-006**: El 100 % de los errores de validación debe mostrar un mensaje claro y específico para que el administrador pueda corregir el campo correspondiente.
 - **SC-007**: El 100 % de los errores durante el guardado debe conservar los datos ingresados para permitir un nuevo intento.
