@@ -5,7 +5,7 @@
 
 ### User Story 1 - Registrar un Lote (Priority: P1)
 
-Como Administrador de la Granja, quiero registrar un lote de pollos indicando la cantidad de pollos y la fecha de ingreso.
+Como Administrador de la Granja, quiero registrar un lote de pollos indicando la cantidad de pollos, el nombre, la fecha de ingreso y el costo del lote.
 
 **Why this priority**: Al registrarse un lote este permite obtener la información crucial para la operaciones del sistema como lo es el control de la dieta de los pollos (Modulo 2) y el calculo de la matriz de venta final (Modulo 3).
 
@@ -14,7 +14,7 @@ Como Administrador de la Granja, quiero registrar un lote de pollos indicando la
 **Acceptance Scenarios** :
 1.  **Scenario** : Registro exitoso del lote
    - **Given** el administrador intente registrar un lote
-   * **When** ingrese la población inicial, la fecha de ingreso y cuanto costó el lote
+   * **When** ingrese la población inicial, la fecha de ingreso, nombre y cuanto costó el lote
    * **Then** el sistema genera un UUID único
    * **And** el sistema le da a elegir un galpón disponible
    * **And** el sistema debe almacenar el lote
@@ -80,6 +80,7 @@ Como Administrador de la Granja, quiero poder ingresar un lote de pollos dentro 
 *   **Lote**: Representa el conjunto biológico de pollos alojado en un galpón específico durante un ciclo productivo cerrado.
     *  Identificador único.
     *  Identificador único del galpón.
+    *  Nombre 
     *  Fecha de ingreso del lote
     *  Edad del lote en días transcurridos.
     *  Cantidad original de aves ingresadas.
