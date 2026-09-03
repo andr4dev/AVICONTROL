@@ -5,39 +5,35 @@
 
 ### User Story 1 - Registrar un Lote (Priority: P1)
 
-Como Administrador de la Granja, quiero registrar un lote de pollos indicando la cantidad de pollos y la fecha que ingresaran a un galpón que se encuentre disponible. 
+Como Administrador de la Granja, quiero registrar un lote de pollos indicando la cantidad de pollos y la fecha de ingreso.
 
-**Why this priority** : Es la piedra angular operativa del sistema. Sin registrar el ingreso de aves, no existen lotes activos en el sistema, lo que imposibilita los flujos de nutrición y análisis financiero de liquidación.
+**Why this priority**: Al registrarse un lote este permite obtener la información crucial para la operaciones del sistema como lo es el control de la dieta de los pollos (Modulo 2) y el calculo de la matriz de venta final (Modulo 3).
 
-**Independent Test** : Puede probarse eligiendo un galpón que se encuentre disponible e ingresando la población actual y su fecha, se puede verificar consultando el galpón en la lista.
+**Independent Test** : Creación de un formulario donde el sistema solicita la fecha de ingreso, la población inicial, el costo del lote.
 
 **Acceptance Scenarios** :
-1.  **Scenario** : Registro exitoso
-   - **Given** el administrador elija un galpón e intente registrar un lote.
-   * **When** ingresa una cantidad de pollos de numero entero positivo y una fecha de ingreso.
-   * **Then** el sistema debe almacenar el lote y generar un UUID único.
-   * **And** el estado actual del galpón debe cambiar automáticamente a "Productivo".
-   * **And** la población actual del lote debe quedar guardada con el valor dado.
-   * **And** la fecha de ingreso debe quedar guardada con la fecha actual del ingreso.
+1.  **Scenario** : Registro exitoso del lote
+   - **Given** el administrador intente registrar un lote
+   * **When** ingrese la población inicial, la fecha de ingreso y cuanto costó el lote
+   * **Then** el sistema debe almacenar el lote
+   * **And** generar un UUID único
+   * **And** elige galpón
 
 2. **Scenario** : La población de pollos supera el aforo máximo del galpón
    - **Given** el administrador ingresa una población de pollos
    * **When** la población de pollos es mayor al aforo máximo
-   * **Then** el sistema rechaza el valor
-   * **And** lanza un mensaje de alerta
-   * **And** permite al administrador ingresar un nuevo valor
-
-1. **Scenario** : La población de pollos no es suficiente.
-   - **Given** el administrador ingresa una población de pollos
-   * **When** la población de pollos no es suficiente
-   * **Then** el sistema rechaza el valor
-   * **And** lanza un mensaje de alerta
-   * **And** permite al administrador ingresar un nuevo valor
+   * **Then** lanza una alerta 
+   * **And** se permite ingresar un nuevo valor
 ##### Edge Cases
-*   **Fechas Retroactivas o Futuras**: ¿Qué ocurre si un usuario ingresa una fecha ingreso posterior a la fecha actual del sistema o con más de 3 días de retroactividad? El sistema debe rechazar fechas futuras de alojamiento de manera estricta.
-*  **Solicitudes de Registro Concurrentes**: Si dos usuarios intentan registrar un lote al mismo tiempo sobre el mismo id_galpon en estado DISPONIBLE, el sistema debe procesar la primera transacción y bloquear de inmediato la segunda, arrojando un error de concurrencia ya que el estado pasa a PRODUCTIVO en la primera confirmación.
-* **Población igual a cero o negativo** : El sistema debe rechazar el valor, señalar el campo e indicar que debe ser un entero positivo.
-- **Población con decimales, letras o caracteres inválidos**: El sistema debe rechazar el valor y solicitar una Población entero positivo.
+
+¿Qué ocurre si un usuario ingresa una fecha ingreso posterior a la fecha actual del sistema? → 
+
+¿Qué pasa si dos usuarios intentan registrar un lote al mismo tiempo sobre el mismo galpón? → El sistema debe procesar la primera transacción y bloquear de inmediato la segunda, arrojando un error de concurrencia ya que el estado pasa a productivo en la primera confirmación.
+
+¿Qué pasa si la población igual a cero o negativo? → El sistema debe rechazar el valor, señalar el campo e indicar que debe ser un entero positivo.
+
+¿Qué pasa si la población se ingresa con decimales, letras o caracteres inválidos? → El sistema debe rechazar el valor y solicitar una Población entero positivo.
+
 - **Error durante el guardado**: El sistema debe informar que no fue posible guardar el lote y conservar los datos introducidos para permitir un nuevo intento.
 - **Abandono del formulario**: El sistema no debe crear ningún galpón mientras el usuario no confirme el guardado.
 - **Fallo en la generación del UUID**: El sistema debe cancelar la creación, informar el error y no guardar un galpón sin identificador único.
