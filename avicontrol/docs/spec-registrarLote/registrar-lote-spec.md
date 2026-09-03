@@ -42,6 +42,12 @@ Como Administrador de la Granja, quiero registrar un lote de pollos indicando la
    * **When** el valor ingresado es decimal, letras o caracteres inválidos
    * **Then** el sistema lanza una alerta
    * **And** el sistema permite ingresar una nueva población inicial
+
+6. **Scenario**: Registro con nombre vacío
+   - **Given** El nombre está vacío o contiene únicamente espacios
+   - **When** el administrador intenta guardar el formulario
+   - **Then** el sistema rechaza el registro
+   - **And** muestra un mensaje indicando que el nombre es obligatorio
 ### User Story 2 - Asignar lote a galpón (Priority: P2)
 
 Como Administrador de la Granja, quiero poder ingresar un lote de pollos dentro de en un galpón.
