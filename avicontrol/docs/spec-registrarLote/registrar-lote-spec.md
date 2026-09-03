@@ -86,11 +86,10 @@ Como Administrador de la Granja, quiero poder ingresar un lote de pollos dentro 
 *   **Lote**: Representa el conjunto biológico de pollos alojado en un galpón específico durante un ciclo productivo cerrado.
     *  Identificador único.
     *  Identificador único del galpón.
-    *  Nombre 
-    *  Fecha de ingreso del lote
-    *  Edad del lote en días transcurridos.
-    *  Cantidad original de aves ingresadas.
-    *  Población actual de pollos en el lote
+    *  Nombre.
+    *  Fecha de ingreso.
+    *  Población inicial.
+    *  Población actual.
     
 *   **Galpón**: Se incluye porque actúa como el registro maestro o de referencia que debe existir previamente para poder persistir el lote.
     * UUID único
