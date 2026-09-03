@@ -149,7 +149,6 @@
 	- Población inicial
 	- Población actual
 	- Fecha de ingreso
-	- Edad calculada en días
 	- Costo total
 	- Llave foránea del galpón para el cual fue registrado
 
