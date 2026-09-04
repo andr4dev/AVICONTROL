@@ -6,7 +6,7 @@
 
 ### User Story 1 - Actualización manual del ciclo productivo (Priority: P1)
 
-Como administrador de la granja, quiero poder actualizar manualmente el estado de un galpón siguiendo estrictamente las fases de su ciclo de vida, para reflejar la evolución del lote alojado o los procesos de limpieza de la infraestructura.
+Como administrador de la granja, quiero poder actualizar manualmente el estado de un galpón siguiendo las fases de su ciclo de vida, para reflejar la evolución del lote alojado o los procesos de limpieza de la infraestructura.
 
 **Why this priority**: Garantiza que el sistema refleje la realidad operativa de la granja y que se cumplan las reglas lógicas del negocio (bioseguridad y cosecha).
 
@@ -31,18 +31,18 @@ Como administrador de la granja, quiero poder actualizar manualmente el estado d
 
 ---
 
-### User Story 2 - Gestión de Mantenimiento Simultáneo (Priority: P2)
+### User Story 2 - Entrada y Salida de Mantenimiento (Priority: P2)
 
-Como administrador, necesito poder indicar que un galpón está en "Mantenimiento" sin perder su estado operativo actual (ej. que siga siendo "Productivo"), para reflejar reparaciones en curso mientras está ocupado.
+Como administrador, necesito poder poner un galpón vacío en "Mantenimiento" para reflejar que está bajo reparaciones y bloquear temporalmente el ingreso de nuevos lotes.
 
-**Why this priority**: Evita cuellos de botella informáticos donde el sistema obligaría a sacar las aves (cambiar estado) solo para poder registrar una reparación.
+**Why this priority**: Previene que se asigne un lote de aves a un galpón que no está en condiciones físicas para recibirlas.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Asignar mantenimiento a un galpón ocupado
-   - **Given** un galpón en estado "Productivo"
-   - **When** el administrador lo marca como "En Mantenimiento"
-   - **Then** el galpón refleja ambos estados al mismo tiempo ("Productivo" y "Mantenimiento").
+1. **Scenario**: Paso a mantenimiento desde Disponible
+   - **Given** un galpón en estado "Disponible" (o "Vaciado Sanitario")
+   - **When** el administrador cambia el estado a "Mantenimiento"
+   - **Then** el galpón adopta el nuevo estado y no aparecerá como opción al registrar un nuevo lote.
 
 ---
 
@@ -50,20 +50,21 @@ Como administrador, necesito poder indicar que un galpón está en "Mantenimient
 
 ### Functional Requirements
 
-- **FR-001**: El sistema MUST permitir al administrador actualizar manualmente el estado de un galpón, pero restringiendo las opciones según el estado actual:
+- **FR-001**: El sistema MUST permitir al administrador actualizar manualmente el estado de un galpón, restringiendo las opciones según el estado actual:
+  - De **Disponible** SOLO puede pasar a: `Mantenimiento` (manualmente). *Nota: a Productivo pasa de forma automática.*
   - De **Productivo** SOLO puede pasar a: `En Cosecha` o `Aislamiento`.
   - De **En Cosecha** SOLO puede pasar a: `Vaciado Sanitario`.
   - De **Vaciado Sanitario** SOLO puede pasar a: `Mantenimiento` o `Disponible`.
   - De **Aislamiento** SOLO puede pasar a: `Productivo` o `Vaciado Sanitario`.
+  - De **Mantenimiento** SOLO puede pasar a: `Disponible`.
 - **FR-002**: El sistema MUST automatizar las siguientes transiciones, bloqueando su ejecución manual:
   - Al crear un Galpón nuevo -> automáticamente a `Disponible`.
   - Al registrar un Lote en un Galpón -> automáticamente a `Productivo`.
-- **FR-003**: El sistema MUST permitir que un galpón posea el estado de **Mantenimiento** simultáneamente con cualquier otro estado de su ciclo biológico (ej: Productivo + Mantenimiento).
-- **FR-004**: El estado **Aislamiento** MUST actuar de manera puramente informativa (indicando posible contagio), sin bloquear funcionalidades o traslados en el sistema.
+- **FR-003**: El estado **Aislamiento** MUST actuar de manera puramente informativa (indicando posible contagio), sin bloquear funcionalidades o traslados en el sistema.
 
 ### Key Entities
 
-- **Galpón**: Posee el control de su fase operativa. Dado que "Mantenimiento" puede coexistir con otros estados, el modelo de datos debe soportar multiplicidad de estados (por ejemplo, tener un campo para la fase del ciclo `Disponible/Productivo/Cosecha/Vaciado/Aislamiento` y un campo o flag booleano adicional como `enMantenimiento`).
+- **Galpón**: Posee un único campo `Estado` que controla su fase operativa exclusiva. El estado de "Mantenimiento" forma parte de este mismo ciclo, asegurando que un galpón en reparación no pueda ser confundido con uno "Disponible".
 
 ## Success Criteria *(mandatory)*
 

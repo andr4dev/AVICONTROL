@@ -74,9 +74,8 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 - **FR-004**: El sistema DEBE eliminar los espacios sobrantes al inicio y al final del nombre antes de guardarlo.
 - **FR-005**: El sistema DEBE impedir el registro de nombres duplicados.
 - **FR-006**: El sistema DEBE generar automáticamente un UUID único para cada galpón registrado.
-- **FR-007**: El sistema DEBE establecer el estado de fase inicial del galpón en “Disponible”.
-- **FR-008**: El sistema DEBE establecer el indicador de "Mantenimiento" en falso (false) al registrar.
-- **FR-009**: El sistema NO DEBE permitir asociar un lote durante el registro inicial (es un flujo separado).
+- **FR-007**: El sistema DEBE establecer el estado inicial del galpón en “Disponible”.
+- **FR-008**: El sistema NO DEBE permitir asociar un lote durante el registro inicial (es un flujo separado).
 
 ### Key Entities 
 
@@ -84,8 +83,7 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
   - `id`: UUID único
   - `nombre`: String
   - `aforo_maximo`: Entero positivo
-  - `estado_fase`: Enum (Disponible, Productivo, En Cosecha, Vaciado Sanitario, Aislamiento). Valor por defecto al registrar: "Disponible".
-  - `en_mantenimiento`: Booleano. Valor por defecto al registrar: false.
+  - `estado`: Enum (Disponible, Productivo, En Cosecha, Vaciado Sanitario, Aislamiento, Mantenimiento). Valor por defecto al registrar: "Disponible".
 
 - **Administrador de granja**: Usuario autorizado para registrar y administrar galpones.
 
@@ -93,5 +91,9 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los galpones nuevos nacen estrictamente con estado "Disponible" y sin la bandera de mantenimiento.
+- **SC-001**: El 100% de los galpones nuevos nacen estrictamente con estado "Disponible".
 - **SC-002**: El 100% de los intentos de registros con nombres duplicados o valores nulos son rechazados antes de llegar a la base de datos.
+- **SC-003**: El 100 % de los galpones registrados correctamente debe aparecer inmediatamente en la lista de galpones.
+- **SC-004**: El 100 % de los galpones creados debe recibir un UUID único.
+- **SC-005**: El 100 % de los errores de validación debe mostrar un mensaje claro y específico para que el administrador pueda corregir el campo correspondiente.
+- **SC-006**: El 100 % de los errores durante el guardado debe conservar los datos ingresados en el formulario para permitir un nuevo intento sin reescribir todo.
