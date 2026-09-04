@@ -1,6 +1,6 @@
 ## Feature Specification: Editar Galpón
 
-**Created**: 2025-03-17
+**Created**: 2026-09-04
 
 ## User Scenarios & Testing
 
