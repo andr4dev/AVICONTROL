@@ -18,7 +18,7 @@ Como administrador de granja, quiero registrar un galpón indicando su nombre y 
    - **Given** el administrador intenta ingresar un galpón
    - **When** ingresa un nombre válido y un aforo máximo entero positivo
    - **Then** el sistema crea el galpón con un UUID automático
-   - **And** establece el estado inicial en “Disponible”
+   - **And** establece el estado inicial en “Disponible” (con Mantenimiento en false)
    - **And** redirige al administrador a la lista de galpones
 
 2. **Scenario**: Registro con nombre duplicado
@@ -53,21 +53,16 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 1. **Scenario**: Galpón visible en la lista
    - **Given** el galpón fue registrado correctamente
    - **When** el sistema redirige a la lista de galpones
-   - **Then** el nuevo galpón aparece inmediatamente con su nombre.
+   - **Then** el nuevo galpón aparece inmediatamente con su nombre, aforo y estado "Disponible".
+
 ## Edge Cases
 
 - **Nombre con espacios al inicio o al final**: El sistema debe eliminar los espacios sobrantes antes de validar y guardar el nombre.
 - **Nombre compuesto solo por espacios**: El sistema debe rechazar el registro y mostrar un mensaje indicando que el nombre es obligatorio.
-- **Nombre duplicado**: El sistema debe rechazar el registro y mostrar un mensaje indicando que ya existe un galpón con ese nombre.
-- **Nombre duplicado con diferencias de mayúsculas o espacios**: El sistema debe considerar los nombres equivalentes, rechazar el registro y mostrar el mensaje correspondiente.
-- **Aforo igual a cero o negativo**: El sistema debe rechazar el valor, señalar el campo e indicar que debe ser un entero positivo.
-- **Aforo con decimales, letras o caracteres inválidos**: El sistema debe rechazar el valor y solicitar un aforo entero positivo.
-- **Aforo extremadamente alto**: El sistema debe permitirlo porque no se ha definido un límite superior, siempre que sea un entero positivo.
+- **Nombre duplicado**: El sistema debe rechazar el registro y mostrar un mensaje indicando que ya existe un galpón con ese nombre (ignorando diferencias de mayúsculas/espacios).
 - **Error durante el guardado**: El sistema debe informar que no fue posible guardar el galpón y conservar los datos introducidos para permitir un nuevo intento.
 - **Dos usuarios registran simultáneamente el mismo nombre**: El sistema debe validar la unicidad al guardar. Solo un registro debe crearse y el otro intento debe rechazarse.
-- **Abandono del formulario**: El sistema no debe crear ningún galpón mientras el usuario no confirme el guardado.
 - **Fallo en la generación del UUID**: El sistema debe cancelar la creación, informar el error y no guardar un galpón sin identificador único.
-- **Nombre demasiado largo**: No existe una longitud máxima definida actualmente. El sistema debe aplicar el límite técnico disponible y mostrar un mensaje claro si se excede.
 
 ## Requirements *(mandatory)*
 
@@ -78,25 +73,19 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 - **FR-003**: El sistema DEBE solicitar un aforo máximo entero y positivo.
 - **FR-004**: El sistema DEBE eliminar los espacios sobrantes al inicio y al final del nombre antes de guardarlo.
 - **FR-005**: El sistema DEBE impedir el registro de nombres duplicados.
-- **FR-006**: El sistema DEBE mostrar mensajes de validación claros y específicos para cada campo.
-- **FR-007**: El sistema DEBE generar automáticamente un UUID único para cada galpón registrado.
-- **FR-010**: El sistema DEBE establecer el estado inicial del galpón en “Disponible”.
-- **FR-011**: El sistema DEBE guardar la información del galpón cuando todos los datos sean válidos.
-- **FR-012**: El sistema DEBE conservar los datos introducidos cuando ocurra un error durante el guardado.
-- **FR-013**: El sistema DEBE redirigir al administrador a la lista de galpones después de un registro exitoso.
-- **FR-014**: El sistema DEBE mostrar inmediatamente en la lista el nuevo galpón con su nombre, aforo máximo y estado.
-- **FR-015**: El sistema NO DEBE crear un registro si falla la generación del UUID o la persistencia de los datos.
-- **FR-016**: El sistema DEBE validar nuevamente la unicidad del nombre al momento de guardar para evitar duplicados por registros simultáneos.
+- **FR-006**: El sistema DEBE generar automáticamente un UUID único para cada galpón registrado.
+- **FR-007**: El sistema DEBE establecer el estado de fase inicial del galpón en “Disponible”.
+- **FR-008**: El sistema DEBE establecer el indicador de "Mantenimiento" en falso (false) al registrar.
+- **FR-009**: El sistema NO DEBE permitir asociar un lote durante el registro inicial (es un flujo separado).
 
-**Reglas pendientes de definición**:
-
-### Key Entities *(include if feature involves data)*
+### Key Entities 
 
 - **Galpón**: Representa una unidad física de producción avícola.
-  - UUID único
-  - Nombre
-  - Aforo máximo
-  - Estado(Disponible, vaciado sanitario, productivo, en cosecha, mantenimiento, aislamiento)
+  - `id`: UUID único
+  - `nombre`: String
+  - `aforo_maximo`: Entero positivo
+  - `estado_fase`: Enum (Disponible, Productivo, En Cosecha, Vaciado Sanitario, Aislamiento). Valor por defecto al registrar: "Disponible".
+  - `en_mantenimiento`: Booleano. Valor por defecto al registrar: false.
 
 - **Administrador de granja**: Usuario autorizado para registrar y administrar galpones.
 
@@ -104,11 +93,5 @@ Como administrador de granja, quiero visualizar el galpón recién registrado en
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100 % de los galpones registrados correctamente debe aparecer inmediatamente en la lista de galpones.
-- **SC-002**: El 100 % de los galpones creados debe recibir un UUID único.
-- **SC-003**: El 100 % de los registros válidos debe guardarse con nombre, aforo máximo y estado.
-- **SC-004**: El 100 % de los nuevos galpones debe iniciar con estado “Disponible”.
-- **SC-005**: El 100 % de los intentos con nombre vacío, aforo inválido o nombre duplicado debe rechazarse antes de crear el registro.
-- **SC-006**: El 100 % de los errores de validación debe mostrar un mensaje claro y específico para que el administrador pueda corregir el campo correspondiente.
-- **SC-007**: El 100 % de los errores durante el guardado debe conservar los datos ingresados para permitir un nuevo intento.
-- **SC-008**: Ningún galpón debe guardarse sin un nombre válido, un aforo entero positivo o un UUID único.
+- **SC-001**: El 100% de los galpones nuevos nacen estrictamente con estado "Disponible" y sin la bandera de mantenimiento.
+- **SC-002**: El 100% de los intentos de registros con nombres duplicados o valores nulos son rechazados antes de llegar a la base de datos.
