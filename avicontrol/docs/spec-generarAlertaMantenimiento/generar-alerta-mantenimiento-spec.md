@@ -1,88 +1,80 @@
-# Feature Specification: Generar alerta de mantenimiento
+## Feature Specification: Generar Alerta de Mantenimiento
 
 **Created**: 2026-09-04
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing
 
-### User Story 1 - Reportar un daño o necesidad de infraestructura (Priority: P1)
+### User Story 1 - Generación de alerta de mantenimiento por parte del técnico (Priority: P1)
 
-Como Técnico de infraestructura, quiero generar una alerta de mantenimiento para un galpón específico indicando el problema, para que el administrador esté enterado y pueda programar las reparaciones necesarias.
+Como técnico de infraestructura identifico una falla en un galpón y necesito notificar al administrador para que se programe una reparación. 
 
-**Why this priority**: Es vital capturar los daños físicos a tiempo para evitar que un galpón se deteriore o que se asigne un nuevo lote a una infraestructura defectuosa.
+**Why this priority**: Es el mecanismo para informar al administrador sobre problemas de infraestructura que requieren atención. Sin esta funcionalidad, las fallas no se comunican formalmente y se pierde trazabilidad. Es una acción esencial para la operación segura de la granja.
 
-**Independent Test**: El técnico inicia sesión, selecciona un galpón de la lista, redacta la descripción del daño y envía la alerta. El sistema la guarda con estado "Pendiente" y notifica al administrador.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Registro exitoso de la alerta por el técnico
-   - **Given** un técnico de infraestructura autenticado en el sistema
-   - **When** selecciona un galpón por su nombre y registra una descripción detallada del problema y la urgencia (Baja, Media, Alta)
-   - **Then** el sistema genera un UUID único para la alerta
-   - **And** almacena la alerta vinculada al galpón con el estado inicial "Pendiente"
-   - **And** el galpón CONSERVA su estado operativo actual (no cambia automáticamente).
-
-### User Story 2 - Revisión y aprobación de la alerta por el administrador (Priority: P1)
-
-Como administrador de granja, quiero revisar las alertas de mantenimiento pendientes y, si el galpón está en condiciones (vacío), cambiar su estado a "Mantenimiento" para iniciar la reparación.
-
-**Why this priority**: El administrador es el único responsable del flujo productivo y debe decidir el momento adecuado para inhabilitar el galpón respetando el ciclo biológico.
+**Independent Test**: Puede probarse de forma aislada teniendo al menos un galpón en estado "Disponible". El técnico genera una alerta con descripción y verifica que aparece en la lista de alertas pendientes, que no se puede generar una segunda alerta para el mismo galpón y que la redirección es correcta. No depende de otros módulos.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Aprobación de alerta y pase a mantenimiento (Galpón Vacío)
-   - **Given** una alerta en estado "Pendiente" sobre un galpón que actualmente está en "Disponible" o "Vaciado Sanitario"
-   - **When** el administrador revisa la alerta y decide aprobar el inicio del mantenimiento
-   - **Then** el sistema cambia el estado de la alerta a "Aprobada / En Reparación"
-   - **And** cambia automáticamente el estado del galpón a "Mantenimiento".
+1. **Scenario**: Generación exitosa de alerta
+   - **Given** existe un galpón en estado "Disponible" y el técnico está en el formulario "Generar alerta de mantenimiento"
+   - **When** selecciona el galpón, ingresa una descripción (ej. "Reparar sistema de ventilación"), opcionalmente selecciona severidad "Alta" y tipo "Ventilación", confirma la alerta
+   - **Then** el sistema crea la alerta con fecha/hora automática, la asocia al galpón y al técnico, la marca como "Pendiente", redirige a la lista de galpones disponibles y muestra mensaje de éxito. La alerta es visible en la bandeja de alertas.
 
-2. **Scenario**: Aprobación postergada (Galpón Ocupado)
-   - **Given** una alerta sobre un galpón que está en "Productivo" (con aves adentro)
-   - **When** el administrador revisa la alerta
-   - **Then** el sistema NO permite cambiar el estado del galpón a "Mantenimiento" (por reglas de bioseguridad)
-   - **And** permite al administrador marcar la alerta como "Programada para fin de ciclo", posponiendo el mantenimiento físico real hasta que el galpón se vacíe.
+2. **Scenario**: Intento de generar alerta para galpón no disponible
+   - **Given** existe un galpón en estado "Productivo" (no disponible) y un galpón "Disponible"
+   - **When** el técnico accede al formulario de generación de alerta
+   - **Then** el sistema solo muestra el galpón "Disponible" en el listado de selección; el galpón "Productivo" no aparece.
 
-## Edge Cases
+3. **Scenario**: Intento de generar alerta duplicada para el mismo galpón
+   - **Given** ya existe una alerta activa (pendiente) para un galpón "Disponible"
+   - **When** el técnico intenta generar otra alerta para ese mismo galpón
+   - **Then** el sistema muestra un error indicando que ya existe una alerta activa para ese galpón y no crea una nueva.
 
-- **Múltiples alertas**: Un técnico puede registrar varias alertas para el mismo galpón si hay distintos daños. El administrador puede consolidarlas.
-- **Fallo de UUID**: El sistema debe cancelar la creación e informar el error, no se debe guardar una alerta sin identificador único.
-- **El técnico selecciona un galpón inexistente**: El sistema debe rechazar el registro y mostrar un error.
-- **Intento técnico de cambiar estado**: El técnico de infraestructura NO tiene permisos para alterar el estado operativo del galpón directamente; su función llega hasta la generación de la alerta.
+4. **Scenario**: Intento de generar alerta con descripción vacía
+   - **Given** el técnico ha seleccionado un galpón disponible
+   - **When** deja el campo de descripción vacío y envía el formulario
+   - **Then** el sistema muestra un mensaje de error indicando que la descripción es obligatoria y no crea la alerta.
 
-## Requirements *(mandatory)*
+5. **Scenario**: Cancelación de la generación antes de confirmar
+   - **Given** el técnico ha completado los datos en el formulario
+   - **When** en el mensaje de confirmación selecciona "Cancelar"
+   - **Then** el sistema descarta los datos, no crea la alerta y permanece en el formulario o regresa sin cambios.
+
+---
+
+### Edge Cases
+
+- ¿Qué sucede si el galpón seleccionado ya no existe al momento de guardar (por manipulación de URL)? El sistema debe validar en el servidor y mostrar error "galpón no encontrado".
+- ¿Qué sucede si dos técnicos intentan generar una alerta para el mismo galpón simultáneamente? El sistema debe tener una restricción de unicidad en la base de datos para alertas activas por galpón, rechazando la segunda solicitud.
+- ¿Qué sucede si la descripción contiene solo espacios en blanco? Se considera vacía y se muestra error.
+- ¿El técnico debe poder ver sus alertas anteriores? No es parte de este caso de uso, pero el historial queda disponible para consulta del administrador.
+
+## Requirements
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE permitir a los usuarios con rol de "Técnico de infraestructura" generar alertas de mantenimiento.
-- **FR-002**: El sistema DEBE solicitar obligatoriamente la selección de un galpón, una descripción del daño y el nivel de urgencia.
-- **FR-003**: El sistema DEBE generar la alerta con estado inicial "Pendiente" sin alterar el estado operativo (`estado`) del galpón.
-- **FR-004**: El sistema DEBE permitir al rol "Administrador" visualizar un listado de las alertas de mantenimiento pendientes.
-- **FR-005**: El sistema DEBE permitir al administrador cambiar el estado del galpón a "Mantenimiento" desde la alerta, ÚNICAMENTE si el galpón se encuentra en estado "Disponible" o "Vaciado Sanitario".
-- **FR-006**: El sistema DEBE bloquear el paso a "Mantenimiento" si el galpón está en fases ocupadas (Productivo, En Cosecha), permitiendo al administrador solo "programar" o agendar la alerta para más adelante.
-- **FR-007**: El sistema DEBE guardar un registro de auditoría indicando qué técnico creó la alerta y qué administrador la aprobó.
-
+- **FR-001**: El sistema DEBE permitir al técnico de infraestructura generar una alerta de mantenimiento para un galpón.
+- **FR-002**: El sistema DEBE mostrar únicamente galpones en estado "Disponible" en el formulario de selección.
+- **FR-003**: El sistema DEBE validar que el galpón seleccionado exista y esté en estado "Disponible".
+- **FR-004**: El sistema DEBE requerir una descripción del problema, no vacía, con una longitud máxima de 500 caracteres.
+- **FR-005**: El sistema DEBE capturar automáticamente la fecha y hora de generación de la alerta.
+- **FR-007**: El sistema DEBE impedir la creación de más de una alerta activa (estado "Pendiente") por galpón.
+- **FR-008**: El sistema DEBE mostrar un mensaje de confirmación antes de persistir la alerta.
+- **FR-009**: Si el técnico confirma, el sistema DEBE crear la alerta con estado "Pendiente", redirigir a la lista de galpones disponibles y mostrar mensaje de éxito.
+- **FR-010**: Si el técnico cancela, el sistema NO DEBE crear la alerta.
+- **FR-011**: El sistema DEBE almacenar las alertas en un historial accesible para el administrador.
+- **FR-012**: El sistema DEBE mostrar errores claros si la descripción está vacía, el galpón no es válido o ya existe una alerta activa.
 ### Key Entities
 
-- **Alerta de Mantenimiento**: 
-  - `id`: UUID único.
-  - `galpon_id`: UUID del galpón afectado.
-  - `tecnico_id`: UUID del técnico que reporta.
-  - `admin_id`: UUID del administrador que gestiona la alerta (nulo al inicio).
-  - `descripcion`: String detallando el daño.
-  - `urgencia`: Enum (Baja, Media, Alta).
-  - `estado_alerta`: Enum (Pendiente, Programada, En Reparación, Finalizada).
-  - `fecha_creacion`: Timestamp.
+- **Alerta de Mantenimiento**: Representa un aviso de falla de infraestructura generado por el técnico.
+  - Atributos: ID (UUID), Galpón ID (FK), Descripción (texto), Fecha/hora (timestamp), Técnico (identificador), Estado (Pendiente, Atendida, Eliminada), Severidad (opcional), Tipo (opcional).
+  - Relaciones: Pertenece a un Galpón (muchos a uno). Un galpón solo puede tener una alerta activa a la vez.
 
-- **Galpón**:
-  - `estado`: Debe ser evaluado por el administrador. Solo si es "Disponible" o "Vaciado Sanitario" se le permitirá pasar a "Mantenimiento" al gestionar la alerta.
-
-- **Técnico de infraestructura**: Nuevo actor autorizado para registrar daños pero sin poder de decisión sobre el ciclo del galpón.
-
-- **Administrador de granja**: Actor que toma decisiones sobre las alertas.
-
-## Success Criteria *(mandatory)*
+## Success Criteria
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de las alertas generadas por los técnicos se guardan sin alterar el ciclo productivo (estado) del galpón hasta que un administrador intervenga.
-- **SC-002**: El 100% de los intentos de un administrador por pasar a "Mantenimiento" un galpón ocupado (Productivo/Cosecha) a raíz de una alerta, son bloqueados por el sistema, garantizando la integridad de las aves.
-- **SC-003**: Trazabilidad completa: El 100% de las alertas resueltas identifican al técnico creador y al administrador aprobador.
+- **SC-001**: El técnico puede generar una alerta en menos de 2 minutos (excluyendo tiempo de confirmación).
+- **SC-002**: El 100% de las alertas creadas tienen descripción no vacía y galpón válido en estado "Disponible".
+- **SC-003**: El sistema previene la creación de alertas duplicadas activas para el mismo galpón (0% de duplicados).
+- **SC-004**: El 95% de las generaciones exitosas redirigen correctamente a la lista de galpones disponibles con mensaje de éxito.
+- **SC-005**: Todas las alertas generadas quedan registradas en el historial con su estado inicial "Pendiente".
