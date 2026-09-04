@@ -1,5 +1,4 @@
-# Feature Specification: Registrar galpón
-
+# Feature Specification: Editar un galpón
 **Created**: 2026-09-03
 
 ## User Scenarios & Testing *(mandatory)*
