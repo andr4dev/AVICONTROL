@@ -38,7 +38,10 @@ Este documento explica brevemente los casos de uso encontrados en el diagrama, d
 
 - **Actualizar población actual**: En este caso de uso el sistema actualiza la población actual del lote a partir de uno o varios pollos retirados por muerte. No modifica el estado del galpón; cualquier cambio de estado debe remitirse al caso de uso "Actualizar estado".
 
-- **Registrar alerta sanitaria**: En este caso de uso el modulo 2 ocupa avisar al administrador de que en el galpón hay una enfermedad que contagió a uno o varios pollos y el galpón necesita estar en aislamiento.
+- **Recibir alerta sanitaria**: En este caso de uso el modulo 2 ocupa avisar al administrador de que en el galpón hay una enfermedad que contagió a uno o varios pollos y el galpón necesita estar en aislamiento.
+
+- **Recibir vacíado sanitario**: En este caso de uso el modulo 2 ocupa avisar al administrador de que se debe hacer el vaciado sanitario al galpón para poder pasar al estado disponible.
+
 ### 3. Técnico de infraestructura
 - **Generar alerta de mantenimiento**: En este caso de uso el técnico de infraestructura ocupa avisarle al administrador que hay fallas en el galpón y necesitan atención.
 
