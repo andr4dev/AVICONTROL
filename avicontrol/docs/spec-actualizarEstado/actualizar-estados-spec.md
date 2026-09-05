@@ -14,7 +14,7 @@ Como administrador, necesito solicitar el cambio de estado de un galpón para re
 
 ### Autoridad única para cambios de estado
 
-Todo cambio de estado del galpón DEBE ser remitido a este spec, sin importar si se origina en una acción del administrador, el registro de un lote, una alerta sanitaria, una alerta de mantenimiento, una alerta de vaciado sanitario o un proceso automático. El spec de origen puede validar y registrar su evento, pero no debe actualizar directamente el estado del galpón.
+Todo cambio de estado del galpón DEBE ser remitido a este spec, sin importar si se origina en una acción del administrador, el registro de un lote, una alerta sanitaria, una alerta de mantenimiento, una alerta de vaciado sanitario o un proceso automático. El spec de origen puede validar y registrar su evento de origen, pero no debe actualizar directamente el estado del galpón. Para una alerta sanitaria, el módulo 2 registra la alerta y el módulo 1 la recibe y remite la solicitud; este spec registra únicamente el cambio de estado y su origen.
 
 **Acceptance Scenarios**:
 
@@ -25,9 +25,9 @@ Todo cambio de estado del galpón DEBE ser remitido a este spec, sin importar si
 
 2. **Scenario**: Solicitud sanitaria de Productivo a Aislamiento
    - **Given** un galpón en estado "Productivo" con un lote activo
-   - **When** el spec de alerta sanitaria remite una solicitud válida para cambiarlo a "Aislamiento"
+   - **When** el módulo 1 remite una solicitud válida, originada por una alerta sanitaria del módulo 2, para cambiarlo a "Aislamiento"
    - **Then** este spec valida y persiste el cambio a "Aislamiento"
-   - **And** el historial refleja el cambio y su origen sanitario
+   - **And** el historial refleja el cambio y su origen "alerta sanitaria / módulo 2"
 
 3. **Scenario**: Transición de Productivo a En cosecha
    - **Given** un galpón en estado "Productivo"
@@ -41,7 +41,7 @@ Todo cambio de estado del galpón DEBE ser remitido a este spec, sin importar si
 
 5. **Scenario**: Solicitud sanitaria de Aislamiento a Productivo (recuperación de enfermedad)
    - **Given** un galpón en estado "Aislamiento"
-   - **When** el spec de alerta sanitaria remite una solicitud válida para volver a "Productivo"
+   - **When** el módulo 1 remite una solicitud válida, originada por una alerta sanitaria del módulo 2, para volver a "Productivo"
    - **Then** este spec valida y persiste el cambio a "Productivo"
 
 6. **Scenario**: Solicitud de vaciado desde Aislamiento (sacrificio sanitario)
@@ -71,7 +71,7 @@ Todo cambio de estado del galpón DEBE ser remitido a este spec, sin importar si
 
 - ¿Qué sucede si el administrador intenta forzar una transición no permitida manipulando la petición? El sistema debe validar en el servidor y rechazar con error.
 - ¿Qué sucede si el galpón no existe (URL manipulada)? Se muestra error "galpón no encontrado".
-- ¿Qué sucede si se intenta cambiar a "Vaciado sanitario" cuando la población actual no es cero? El sistema debe impedirlo y mostrar un mensaje indicando que aún hay aves en el galpón. *(Asumido: no se debe permitir vaciado sanitario con aves presentes)*
+- ¿Qué sucede si se intenta cambiar a "Vaciado sanitario"? La solicitud debe provenir del spec "Recibir vaciado sanitario" después de la cosecha. La cosecha retira el lote para su venta y el spec de vaciado sanitario desvincula el lote del galpón; por tanto, "Actualizar estado" no debe exigir que la población actual sea cero.
 - ¿Qué sucede si llegan solicitudes simultáneas para el mismo galpón? Cada solicitud debe validar el estado vigente dentro de la transacción; si el estado esperado ya cambió, la solicitud se rechaza y no sobrescribe la actualización confirmada anteriormente.
 - ¿Qué sucede si el estado actual es "Productivo" y el administrador quiere pasar a "Mantenimiento"? No se permite; solo desde Disponible.
 
@@ -82,28 +82,28 @@ Todo cambio de estado del galpón DEBE ser remitido a este spec, sin importar si
 - **FR-001**: El sistema DEBE permitir al administrador actualizar el estado de un galpón existente.
 - **FR-002**: El sistema DEBE aceptar únicamente las siguientes transiciones, indicando el origen de la solicitud:
    - Desde **Disponible**: **Mantenimiento** (administrador, al atender alerta de mantenimiento)
-   - Desde **Productivo**: **En cosecha** (administrador) o **Aislamiento** (alerta sanitaria)
+   - Desde **Productivo**: **En cosecha** (administrador) o **Aislamiento** (módulo 1, por alerta sanitaria del módulo 2)
    - Desde **En cosecha**: **Vaciado sanitario** (alerta de vaciado)
    - Desde **Vaciado sanitario**: **Disponible** (proceso automático al finalizar el periodo)
    - Desde **Mantenimiento**: **Disponible** (administrador, al finalizar mantenimiento)
-   - Desde **Aislamiento**: **Productivo** (alerta sanitaria) o **Vaciado sanitario** (alerta de vaciado)
+   - Desde **Aislamiento**: **Productivo** (módulo 1, por alerta sanitaria del módulo 2) o **Vaciado sanitario** (alerta de vaciado)
 - **FR-003**: El sistema DEBE validar que la transición solicitada esté permitida y que el origen tenga autorización para ella antes de persistir el cambio.
 - **FR-004**: El sistema DEBE rechazar solicitudes manuales de **Disponible** a **Productivo**; esa transición solo puede ser remitida por el spec de registro de lote después de crear correctamente el lote.
 - **FR-005**: El sistema DEBE impedir la transición de **Aislamiento** a **En cosecha** (no se pueden vender aves enfermas).
-- **FR-006**: Antes de guardar un cambio solicitado directamente por el administrador, el sistema DEBE mostrar un mensaje de confirmación ("¿Estás seguro de actualizar el estado?"). Las solicitudes provenientes de otros specs deben cumplir la confirmación o autorización definida por su flujo de origen.
+- **FR-006**: Antes de guardar un cambio solicitado directamente por el administrador, el sistema DEBE mostrar un mensaje de confirmación ("¿Estás seguro de actualizar el estado?"). Las solicitudes provenientes de otros specs DEBEN incluir la autorización definida por su flujo de origen; las solicitudes del módulo 1 por alertas sanitarias se consideran autorizadas después de la validación de la alerta recibida del módulo 2 y no requieren una confirmación manual adicional.
 - **FR-007**: Si la solicitud es válida y, cuando corresponda, está confirmada, este spec DEBE actualizar el estado del galpón.
-- **FR-008**: El sistema DEBE registrar en el historial de cambios: identificador del galpón, estado anterior, estado nuevo, timestamp. *(Usuario pendiente, se omite por autenticación no especificada)*
-- **FR-009**: Tras la actualización exitosa, el sistema DEBE redirigir al listado de galpones y mostrar mensaje de éxito.
+- **FR-008**: El sistema DEBE registrar en el historial de cambios: identificador del galpón, estado anterior, estado nuevo, timestamp y origen de la solicitud. Para alertas sanitarias, el origen debe ser "alerta sanitaria / módulo 2". *(Usuario pendiente, se omite por autenticación no especificada)*
+- **FR-009**: Tras una actualización manual exitosa, el sistema DEBE redirigir al listado de galpones y mostrar mensaje de éxito. Para solicitudes provenientes de otros specs, debe devolver el resultado del procesamiento al spec solicitante.
 - **FR-010**: Si la transición es inválida o el galpón no existe, el sistema DEBE mostrar un mensaje de error y no realizar cambios.
-- **FR-011**: El sistema DEBE validar que la población actual sea cero antes de permitir la transición a **Vaciado sanitario** desde **En cosecha** o **Aislamiento**.
-- **FR-012**: Ningún otro spec DEBE persistir directamente un cambio de estado del galpón; debe remitirlo a este spec con el estado esperado, el estado destino y el origen de la solicitud.
+- **FR-011**: El sistema NO DEBE usar la población actual como condición para permitir la transición a **Vaciado sanitario**. Para la transición desde **En cosecha**, DEBE validar que la solicitud provenga del spec "Recibir vaciado sanitario" después de la cosecha y que el lote haya sido retirado o desvinculado según ese flujo. La transición desde **Aislamiento** a **Vaciado sanitario** también debe depender de una solicitud válida del spec de vaciado sanitario, sin exigir población actual cero.
+- **FR-012**: Ningún otro spec DEBE persistir directamente un cambio de estado del galpón; debe remitirlo a este spec con el estado esperado, el estado destino y el origen de la solicitud. En el caso sanitario, el módulo 1 debe remitir la solicitud con origen "alerta sanitaria / módulo 2".
 - **FR-013**: Las solicitudes concurrentes DEBEN validarse contra el estado vigente dentro de la misma transacción que persiste el cambio.
 
 ### Key Entities
 
 - **Galpón**: Entidad existente con atributo **Estado actual** que cambia según las reglas.
 - **Historial de Cambios de Estado**: Registro de transiciones de estado.
-  - Atributos: ID, Galpón ID (FK), Estado anterior, Estado nuevo, Timestamp.
+   - Atributos: ID, Galpón ID (FK), Estado anterior, Estado nuevo, Timestamp, Origen de la solicitud.
 
 ## Success Criteria
 

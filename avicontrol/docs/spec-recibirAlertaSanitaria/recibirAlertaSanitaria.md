@@ -59,8 +59,8 @@ Como módulo 1, quiero recibir del módulo 2 una alerta sanitaria de reanudació
 - Si falta el tipo de enfermedad o sospecha o la descripción en una alerta de aislamiento, el sistema debe rechazarla y señalar el campo correspondiente.
 - La gravedad es opcional; si no se informa, el módulo 1 debe conservar el valor vacío al procesar la solicitud.
 - El módulo 2 puede informar identificadores funcionales o UUID; el módulo 1 debe resolver y validar internamente los UUID del galpón y del lote cuando corresponda.
-- Si llegan dos alertas simultáneas para el mismo galpón, cada solicitud debe procesarse dentro de una transacción atómica y respetar el estado vigente al momento de confirmar.
-- Si la alerta de aislamiento y la de reanudación llegan simultáneamente, el estado final debe corresponder al orden de las transacciones confirmadas.
+- Si llegan dos alertas simultáneas para el mismo galpón, cada solicitud debe remitirse a “Actualizar estado”, que debe procesarla dentro de una transacción atómica y respetar el estado vigente al momento de confirmar.
+- Si la alerta de aislamiento y la de reanudación llegan simultáneamente, “Actualizar estado” debe determinar el estado final según el orden de las transacciones confirmadas.
 - Si falla la validación o el envío de la solicitud, el sistema no debe cambiar el estado del galpón ni registrar una alerta incompleta.
 - Si ocurre un error durante el procesamiento, el sistema debe informar el error al módulo 2 para permitir un nuevo envío.
 - El sistema no debe modificar la población, fecha, costo ni demás atributos del lote al cambiar el estado del galpón.
@@ -82,7 +82,7 @@ Como módulo 1, quiero recibir del módulo 2 una alerta sanitaria de reanudació
 - **FR-010**: El sistema DEBE remitir a “Actualizar estado” la transición de “Productivo” a “Aislamiento” únicamente después de validar una alerta de aislamiento recibida del módulo 2.
 - **FR-011**: El sistema DEBE remitir a “Actualizar estado” la transición de “Aislamiento” a “Productivo” únicamente después de validar una alerta de reanudación recibida del módulo 2.
 - **FR-012**: El sistema DEBE rechazar una alerta cuya acción no corresponda al estado actual del galpón.
-- **FR-013**: El procesamiento de la alerta y la solicitud a “Actualizar estado” DEBEN ejecutarse atómicamente; este spec no debe persistir directamente el estado.
+- **FR-013**: La solicitud remitida a “Actualizar estado” DEBE procesarse dentro de la transacción que valida y persiste el cambio de estado; este spec no debe persistir directamente el estado.
 - **FR-014**: El sistema NO DEBE modificar la población, fecha, costo ni demás atributos del lote al procesar la alerta.
 - **FR-015**: Si falla la validación o el envío de la solicitud, el sistema NO DEBE cambiar el estado del galpón ni crear registros propios de alerta.
 - **FR-016**: El sistema DEBE devolver al módulo 2 mensajes claros para alertas inválidas, galpones inexistentes, lotes no activos y errores de procesamiento.
