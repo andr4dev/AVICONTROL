@@ -10,14 +10,16 @@ Como administrado quiero poder registrar un nuevo lote de pollitos en un galpón
 
 **Why this priority**: Es el siguiente paso crítico después de registrar un galpón. Sin lotes no hay producción que gestionar, y este caso de uso permite el inicio de la crianza, activando el ciclo operativo del galpón.
 
-**Independent Test**: Puede probarse de forma aislada teniendo al menos un galpón en estado "Disponible" previamente registrado. El administrador accede al formulario, selecciona el galpón, ingresa datos válidos y verifica que el lote aparece en el listado, el galpón queda en estado "Productivo" y la población actual es igual a la inicial. No depende de otros módulos.
+**Independent Test**: Puede probarse de forma aislada teniendo al menos un galpón en estado "Disponible" previamente registrado. El administrador accede al formulario, selecciona el galpón, ingresa datos válidos y verifica que el lote aparece en el listado, que se remite la solicitud de transición a "Productivo" y que la población actual es igual a la inicial. No depende de otros módulos.
 
 **Acceptance Scenarios**:
 
 1. **Scenario**: Registro de lote con datos válidos
    - **Given** existe un galpón con estado "Disponible" y el administrador está en el formulario "Registrar lote"
    - **When** selecciona el galpón disponible, ingresa un nombre único (ej. "Lote A1"), fecha de ingreso igual a la actual, población inicial 1000, costo total 5000000 (COP) y envía el formulario
-   - **Then** el sistema crea el lote con esos datos, asigna población actual = 1000, cambia el galpón a estado "Productivo", y redirige al listado de lotes mostrando el lote recién creado
+   - **Then** el sistema crea el lote con esos datos y asigna población actual = 1000
+   - **And** remite al spec "Actualizar estado" la solicitud autorizada de transición de "Disponible" a "Productivo"
+   - **And** redirige al listado de lotes mostrando el lote recién creado
 
 2. **Scenario**: Intento de registro con nombre duplicado
    - **Given** ya existe un lote con nombre "Lote A1" en el sistema
@@ -69,9 +71,9 @@ Como administrado quiero poder registrar un nuevo lote de pollitos en un galpón
 - **FR-007**: El sistema DEBE validar que el costo total sea un número entero positivo (mayor que cero) en pesos colombianos.
 - **FR-008**: El sistema DEBE validar que la fecha de ingreso no sea una fecha futura.
 - **FR-009**: El sistema DEBE asignar automáticamente la población actual igual a la población inicial al crear el lote.
-- **FR-010**: El sistema DEBE cambiar automáticamente el estado del galpón a "Productivo" al registrar exitosamente el lote.
+- **FR-010**: Al registrar exitosamente el lote, el sistema DEBE remitir al spec "Actualizar estado" la solicitud de transición de "Disponible" a "Productivo"; no debe actualizar directamente el estado del galpón.
 - **FR-011**: El sistema DEBE asignar un UUID único al lote al crearlo.
-- **FR-012**: El sistema DEBE persistir el lote en la base de datos y actualizar el estado del galpón de forma atómica.
+- **FR-012**: El sistema DEBE persistir el lote y remitir la solicitud de cambio de estado de forma atómica; la actualización del estado DEBE ser ejecutada por el spec "Actualizar estado".
 - **FR-013**: Tras el registro exitoso, el sistema DEBE redirigir al administrador al listado de lotes, mostrando el lote recién creado.
 - **FR-014**: El sistema DEBE mostrar mensajes de error claros si el nombre está duplicado, la fecha es futura, la población inicial o el costo total no son enteros positivos, o el galpón no está disponible.
 
@@ -106,6 +108,6 @@ Como administrado quiero poder registrar un nuevo lote de pollitos en un galpón
 
 - **SC-001**: El administrador puede completar el registro de un lote en menos de 2 minutos (excluyendo tiempo de carga).
 - **SC-002**: El 100% de los lotes registrados cumplen con las validaciones de nombre único, fecha no futura, población inicial y costo total entero positivo.
-- **SC-003**: El 100% de los registros exitosos cambian el estado del galpón a "Productivo" y asignan población actual igual a la inicial.
+- **SC-003**: El 100% de los registros exitosos remite al spec "Actualizar estado" una solicitud válida de transición a "Productivo" y asigna población actual igual a la inicial.
 - **SC-004**: El sistema impide la selección de galpones no disponibles en el formulario de registro (0% de intentos exitosos con galpón no disponible).
 - **SC-005**: El 95% de los registros exitosos redirigen correctamente al listado de lotes sin errores.

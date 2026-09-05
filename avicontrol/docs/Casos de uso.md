@@ -19,25 +19,24 @@ Este documento explica brevemente los casos de uso encontrados en el diagrama, d
 
 - **Editar galpón**: En este caso de uso el administrador ocupa editar el galpón en caso de que sea ampliado o necesite un cambio de nombre.
 
-- **Actualizar estado**: En este caso de uso el administrador ocupa actualizar el estado del galpón en caso de: 
-	1. El modulo 2 generó la alerta para hacer un aislamiento al galpón.
-	2. El actor "Técnico de infraestructura" generó la alerta para hacer un mantenimiento.
-	3. Cuando finalice el vaciado sanitario el galpón queda disponible para un nuevo ingreso de un lote.
-	4. Cuando el galpón este listo para cosechar.
-	5. Cuando el galpón finalizó cosecha del lote y necesita un vaciado sanitario.
+- **Actualizar estado**: Este es el único caso de uso que valida y persiste cualquier cambio de estado del galpón. Recibe solicitudes originadas por el administrador, el registro de lote, las alertas sanitarias, la atención de alertas de mantenimiento, el vaciado sanitario y el proceso automático de finalización del vaciado.
 
 **Nota**: las transiciones tienen las siguientes restricciones:
-- **Productivo**: Solo se cambia a este estado si el estado actual es "Disponible".
-- **En cosecha**: Solo se cambia a este estado si el estado actual es "Productivo".
-- **Disponible**: Solo se cambia a este estado si el estado actual es "Vaciado sanitario". 
-- **Aislamiento**: Solo se cambia a este estado si el estado actual es "Productivo".
-- **Vaciado sanitario**: Solo se cambia a este estado si el estado actual es "En cosecha".
-- **Mantenimiento**: Solo se cambia a este estado si el estado actual es "Disponible". 
+- **Disponible -> Productivo**: Solo mediante una solicitud del caso de uso "Registrar lote" después de crear correctamente el lote.
+- **Disponible -> Mantenimiento**: Mediante una solicitud del administrador al atender una alerta de mantenimiento.
+- **Productivo -> En cosecha**: Mediante una solicitud del administrador.
+- **Productivo -> Aislamiento**: Solo mediante una solicitud válida del caso de uso "Recibir alerta sanitaria".
+- **En cosecha -> Vaciado sanitario**: Solo mediante una solicitud válida del caso de uso "Recibir vaciado sanitario".
+- **Aislamiento -> Productivo**: Solo mediante una solicitud válida de reanudación del caso de uso "Recibir alerta sanitaria".
+- **Aislamiento -> Vaciado sanitario**: Solo mediante una solicitud válida del caso de uso "Recibir vaciado sanitario".
+- **Mantenimiento -> Disponible**: Mediante una solicitud del administrador al finalizar el mantenimiento.
+- **Vaciado sanitario -> Disponible**: Mediante una solicitud del proceso automático al finalizar el periodo configurado.
+- Toda solicitud DEBE validarse contra el estado vigente dentro de la misma transacción que persiste el cambio.
 
 ### 2. Módulo 2
 - **Registrar retiro de ave**: En este caso de uso el modulo 2 avisa al administrador que se retiró un pollo del galpón porque murió. 
 
-- **Actualizar población actual**: En este caso de uso el sistema resta uno o varios pollos que habían inicialmente en el galpón (Esta ligado obligatoriamente a el caso de uso "Registrar retiro de ave").
+- **Actualizar población actual**: En este caso de uso el sistema actualiza la población actual del lote a partir de uno o varios pollos retirados por muerte. No modifica el estado del galpón; cualquier cambio de estado debe remitirse al caso de uso "Actualizar estado".
 
 - **Registrar alerta sanitaria**: En este caso de uso el modulo 2 ocupa avisar al administrador de que en el galpón hay una enfermedad que contagió a uno o varios pollos y el galpón necesita estar en aislamiento.
 ### 3. Técnico de infraestructura

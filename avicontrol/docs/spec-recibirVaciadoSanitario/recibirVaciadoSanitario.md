@@ -6,11 +6,11 @@
 
 ### User Story 1 - Recibir alerta de vaciado sanitario (Priority: P1)
 
-Como sistema AVICONTROL, quiero recibir una alerta emitida por el Módulo 2 para registrar el fin de la cosecha, desvincular el lote del galpón y cambiar el galpón a estado “Vaciado sanitario”.
+Como sistema AVICONTROL, quiero recibir una alerta emitida por el Módulo 2 para registrar el fin de la cosecha, desvincular el lote del galpón y remitir al spec “Actualizar estado” la solicitud de transición a “Vaciado sanitario”.
 
 **Why this priority**: Esta transición inicia el periodo obligatorio de limpieza y desinfección del galpón antes de que pueda alojar un nuevo lote.
 
-**Independent Test**: Se puede enviar una alerta válida con los UUID de alerta, galpón y lote, verificar que se registre una única vez, que el lote quede desvinculado del galpón y que el galpón pase a “Vaciado sanitario”.
+**Independent Test**: Se puede enviar una alerta válida con los UUID de alerta, galpón y lote, verificar que se registre una única vez, que el lote quede desvinculado del galpón y que se remita la solicitud de transición a “Vaciado sanitario”.
 
 **Acceptance Scenarios**:
 
@@ -21,7 +21,7 @@ Como sistema AVICONTROL, quiero recibir una alerta emitida por el Módulo 2 para
 	- **And** registra la alerta aceptada
 	- **And** conserva en la alerta los UUID del lote y del galpón como referencia histórica
 	- **And** elimina la relación activa del lote con el galpón
-	- **And** cambia el estado del galpón a “Vaciado sanitario”
+	- **And** remite al spec “Actualizar estado” la solicitud autorizada de transición a “Vaciado sanitario”
 
 2. **Scenario**: Recepción repetida de la misma alerta
 	- **Given** ya existe una alerta aceptada con el mismo UUID de alerta
@@ -33,7 +33,7 @@ Como sistema AVICONTROL, quiero recibir una alerta emitida por el Módulo 2 para
 3. **Scenario**: Finalización automática del vaciado sanitario
 	- **Given** el galpón está en “Vaciado sanitario” y se cumple el periodo configurable expresado en días
 	- **When** el proceso automático verifica que el periodo terminó
-	- **Then** el sistema cambia el estado del galpón a “Disponible”
+	- **Then** el proceso remite al spec “Actualizar estado” la solicitud autorizada de transición a “Disponible”
 	- **And** mantiene la trazabilidad mediante la alerta recibida y sus UUID
 
 ### User Story 2 - Rechazar alertas inválidas (Priority: P1)
@@ -86,14 +86,14 @@ Como sistema AVICONTROL, quiero rechazar alertas incompletas o inconsistentes pa
 - **FR-004**: El sistema DEBE validar que exista el galpón identificado en la alerta.
 - **FR-005**: El sistema DEBE validar que exista el lote identificado y que su llave foránea corresponda al galpón recibido.
 - **FR-006**: El sistema DEBE aceptar la alerta únicamente cuando el galpón esté en estado “En cosecha”.
-- **FR-007**: Al aceptar la alerta, el sistema DEBE cambiar el estado del galpón de “En cosecha” a “Vaciado sanitario”.
+- **FR-007**: Al aceptar la alerta, el sistema DEBE remitir al spec “Actualizar estado” la transición de “En cosecha” a “Vaciado sanitario”.
 - **FR-008**: Al aceptar la alerta, el sistema DEBE eliminar la relación activa del lote con el galpón.
 - **FR-009**: El sistema DEBE conservar en la alerta aceptada los UUID del lote y del galpón asociados durante la cosecha.
 - **FR-010**: El sistema DEBE registrar la alerta aceptada con sus identificadores, fecha y hora del evento y fecha y hora de recepción.
-- **FR-011**: El registro de la alerta, la desvinculación del lote y el cambio de estado del galpón DEBEN ejecutarse dentro de una única transacción atómica.
+- **FR-011**: El registro de la alerta, la desvinculación del lote y la solicitud al spec “Actualizar estado” DEBEN ejecutarse dentro de una única transacción atómica; este spec no debe persistir directamente el estado.
 - **FR-012**: Si una operación de la transacción falla, el sistema NO DEBE conservar cambios parciales.
 - **FR-013**: El sistema DEBE procesar de forma idempotente una alerta recibida más de una vez.
-- **FR-014**: El sistema DEBE cambiar automáticamente el galpón de “Vaciado sanitario” a “Disponible” después de un periodo configurable expresado en días.
+- **FR-014**: Después de un periodo configurable expresado en días, el proceso DEBE remitir al spec “Actualizar estado” la transición de “Vaciado sanitario” a “Disponible”.
 - **FR-015**: El periodo configurable DEBE quedar definido antes de habilitar la transición automática a “Disponible”.
 - **FR-016**: El sistema DEBE rechazar alertas con datos faltantes, entidades inexistentes, relación lote-galpón inválida, fecha inválida o estado incompatible.
 - **FR-017**: Las alertas rechazadas NO DEBEN modificar el galpón, el lote ni crear un registro de alerta aceptada.
@@ -130,10 +130,10 @@ Como sistema AVICONTROL, quiero rechazar alertas incompletas o inconsistentes pa
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100 % de las alertas válidas debe dejar el galpón en estado “Vaciado sanitario”.
+- **SC-001**: El 100 % de las alertas válidas debe remitir al spec “Actualizar estado” una solicitud de transición a “Vaciado sanitario”.
 - **SC-002**: El 100 % de las alertas válidas debe desvincular la relación activa del lote y conservar los UUID del lote y del galpón en la alerta.
 - **SC-003**: El 100 % de las alertas repetidas debe procesarse sin registros ni transiciones duplicadas.
 - **SC-004**: El 100 % de las alertas inválidas debe dejar sin cambios el galpón y el lote.
 - **SC-005**: El 100 % de las operaciones aceptadas debe ser atómica, sin registros de alerta aceptada asociados a transiciones incompletas.
-- **SC-006**: El 100 % de los galpones con periodo de vaciado cumplido debe pasar automáticamente a “Disponible”.
+- **SC-006**: El 100 % de los galpones con periodo de vaciado cumplido debe remitir al spec “Actualizar estado” una solicitud de transición a “Disponible”.
 - **SC-007**: El 100 % de las alertas aceptadas debe conservar los UUID de alerta, galpón y lote para trazabilidad.

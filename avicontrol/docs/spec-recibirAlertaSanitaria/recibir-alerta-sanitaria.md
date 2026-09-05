@@ -10,7 +10,7 @@ Como administrador u operario de granja, quiero registrar una alerta sanitaria p
 
 **Why this priority**: El aislamiento oportuno reduce el riesgo de propagación de enfermedades entre lotes y permite mantener la trazabilidad de las novedades sanitarias.
 
-**Independent Test**: Se puede registrar una alerta sanitaria válida seleccionando un galpón productivo, verificar que la alerta quede guardada y comprobar que el estado del galpón cambie a “Aislamiento”.
+**Independent Test**: Se puede registrar una alerta sanitaria válida seleccionando un galpón productivo, verificar que la alerta quede guardada y comprobar que se remita al spec “Actualizar estado” la solicitud de transición a “Aislamiento”.
 
 **Acceptance Scenarios**:
 
@@ -21,14 +21,14 @@ Como administrador u operario de granja, quiero registrar una alerta sanitaria p
 	- **And** resuelve y guarda internamente el UUID del galpón afectado
 	- **And** guarda el usuario autenticado que registró la alerta
 	- **And** almacena la alerta sanitaria
-	- **And** cambia atómicamente el estado del galpón a “Aislamiento”
+	- **And** remite al spec “Actualizar estado” la solicitud autorizada de transición a “Aislamiento”
 
 2. **Scenario**: Alerta identificada mediante un lote activo
 	- **Given** existe un lote activo asociado a un galpón productivo
 	- **When** el usuario selecciona el lote por su nombre y registra una alerta de aislamiento válida
 	- **Then** el sistema obtiene internamente el UUID del galpón asociado
 	- **And** registra la alerta sobre ese galpón
-	- **And** cambia el estado del galpón a “Aislamiento”
+	- **And** remite al spec “Actualizar estado” la solicitud autorizada de transición a “Aislamiento”
 
 ### User Story 2 - Autorizar la reanudación de la producción (Priority: P1)
 
@@ -36,7 +36,7 @@ Como administrador u operario de granja, quiero registrar una alerta sanitaria d
 
 **Why this priority**: La producción solo debe reanudarse cuando exista una autorización sanitaria registrada y trazable.
 
-**Independent Test**: Se puede registrar una alerta válida con acción “Reanudación” para un galpón aislado y verificar que su estado cambie a “Productivo” sin modificar los datos del lote.
+**Independent Test**: Se puede registrar una alerta válida con acción “Reanudación” para un galpón aislado y verificar que se remita al spec “Actualizar estado” la solicitud de transición a “Productivo”, sin modificar los datos del lote.
 
 **Acceptance Scenarios**:
 
@@ -45,7 +45,7 @@ Como administrador u operario de granja, quiero registrar una alerta sanitaria d
 	- **When** un administrador u operario registra una alerta con acción “Reanudación”, fecha del día actual y selecciona el galpón o lote activo por su nombre
 	- **Then** el sistema genera un UUID único para la alerta
 	- **And** almacena la alerta y el usuario autenticado que la registró
-	- **And** cambia atómicamente el estado del galpón a “Productivo”
+	- **And** remite al spec “Actualizar estado” la solicitud autorizada de transición a “Productivo”
 	- **And** conserva sin cambios los atributos del lote asociado
 
 ### User Story 3 - Consultar la trazabilidad sanitaria (Priority: P2)
@@ -101,10 +101,10 @@ Como administrador u operario de granja, quiero consultar las alertas sanitarias
 - **FR-008**: El sistema DEBE guardar automáticamente el usuario autenticado que registra la alerta.
 - **FR-009**: El sistema DEBE validar que el galpón exista antes de guardar la alerta.
 - **FR-010**: El sistema DEBE validar que el lote seleccionado exista, esté activo y esté asociado al galpón que será afectado.
-- **FR-011**: El sistema DEBE permitir la transición de “Productivo” a “Aislamiento” únicamente mediante una alerta válida con acción “Aislamiento”.
-- **FR-012**: El sistema DEBE permitir la transición de “Aislamiento” a “Productivo” únicamente mediante una alerta válida con acción “Reanudación”.
+- **FR-011**: El sistema DEBE remitir al spec “Actualizar estado” la transición de “Productivo” a “Aislamiento” únicamente después de validar una alerta con acción “Aislamiento”.
+- **FR-012**: El sistema DEBE remitir al spec “Actualizar estado” la transición de “Aislamiento” a “Productivo” únicamente después de validar una alerta con acción “Reanudación”.
 - **FR-013**: El sistema DEBE rechazar una alerta cuya acción no corresponda al estado actual del galpón.
-- **FR-014**: El almacenamiento de la alerta y el cambio de estado del galpón DEBEN ejecutarse atómicamente dentro de una única transacción.
+- **FR-014**: El almacenamiento de la alerta y la solicitud al spec “Actualizar estado” DEBEN ejecutarse atómicamente dentro de una única transacción; este spec no debe persistir directamente el estado.
 - **FR-015**: El sistema DEBE conservar el historial de todas las alertas sanitarias aceptadas, incluidas las registradas cuando el galpón ya tenga alertas anteriores.
 - **FR-016**: El sistema DEBE mostrar el historial de alertas asociado al galpón seleccionado.
 - **FR-017**: El sistema DEBE mostrar “No disponible” cuando la gravedad opcional no tenga valor.
@@ -147,8 +147,8 @@ Como administrador u operario de granja, quiero consultar las alertas sanitarias
 ### Measurable Outcomes
 
 - **SC-001**: El 100 % de las alertas válidas debe recibir un UUID único.
-- **SC-002**: El 100 % de las alertas de aislamiento válidas debe dejar el galpón en estado “Aislamiento”.
-- **SC-003**: El 100 % de las alertas de reanudación válidas debe dejar el galpón en estado “Productivo”.
+- **SC-002**: El 100 % de las alertas de aislamiento válidas debe remitir al spec “Actualizar estado” una solicitud de transición a “Aislamiento”.
+- **SC-003**: El 100 % de las alertas de reanudación válidas debe remitir al spec “Actualizar estado” una solicitud de transición a “Productivo”.
 - **SC-004**: El 100 % de los cambios de estado y registros de alerta debe ejecutarse atómicamente, sin galpones con transición aplicada sin su alerta correspondiente.
 - **SC-005**: El 100 % de las alertas aceptadas debe conservar el usuario, fecha, acción y referencia interna del galpón.
 - **SC-006**: El 100 % de las alertas con datos inválidos o estado incompatible debe rechazarse con un mensaje específico.

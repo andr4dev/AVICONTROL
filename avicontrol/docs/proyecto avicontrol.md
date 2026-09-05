@@ -18,11 +18,21 @@ Cada unidad debe estar indexada con metadatos que definan su capacidad operativa
 *   **Edad del Lote:** Días transcurridos desde el ingreso (parámetro crítico para la alimentación).
 
 #### 1.2. Ciclo de Vida del Galpón (Estados)
-El sistema gestiona la transición de estados para garantizar la sanidad y eficiencia:
-1.  **Vaciado Sanitario:** Periodo de limpieza y desinfección obligatorio entre lotes.
-2.  **Productivo (Ocupado):** Contiene un lote de pollos en etapa de crecimiento.
-3.  **En Cosecha (Venta):** Los pollos están siendo retirados para su comercialización.
-4.  **Mantenimiento:** Reparaciones técnicas en la infraestructura (comederos, ventilación).
+El caso de uso **Actualizar estado** es el único responsable de validar y persistir las transiciones del galpón. Los estados y sus transiciones son:
+
+| Estado actual | Estado destino | Origen autorizado |
+|---|---|---|
+| Disponible | Productivo | Registro exitoso de lote |
+| Disponible | Mantenimiento | Atención de alerta de mantenimiento |
+| Productivo | En cosecha | Administrador |
+| Productivo | Aislamiento | Alerta sanitaria válida |
+| En cosecha | Vaciado sanitario | Alerta de vaciado sanitario válida |
+| Aislamiento | Productivo | Alerta sanitaria válida de reanudación |
+| Aislamiento | Vaciado sanitario | Alerta de vaciado sanitario válida |
+| Mantenimiento | Disponible | Administrador al finalizar mantenimiento |
+| Vaciado sanitario | Disponible | Proceso automático al finalizar el periodo configurado |
+
+Los estados son **Disponible**, **Productivo**, **En cosecha**, **Vaciado sanitario**, **Mantenimiento** y **Aislamiento**. Ningún caso de uso distinto de **Actualizar estado** debe persistir directamente un cambio de estado.
 
 ---
 

@@ -10,7 +10,7 @@ Como técnico de infraestructura identifico una falla en un galpón y necesito n
 
 **Why this priority**: Es el mecanismo para informar al administrador sobre problemas de infraestructura que requieren atención. Sin esta funcionalidad, las fallas no se comunican formalmente y se pierde trazabilidad. Es una acción esencial para la operación segura de la granja.
 
-**Independent Test**: Puede probarse de forma aislada teniendo al menos un galpón en estado "Disponible". El técnico genera una alerta con descripción y verifica que aparece en la lista de alertas pendientes, que no se puede generar una segunda alerta para el mismo galpón y que la redirección es correcta. No depende de otros módulos.
+**Independent Test**: Puede probarse de forma aislada teniendo al menos un galpón en estado "Disponible". El técnico genera una alerta con descripción y verifica que aparece en la lista de alertas pendientes. La atención posterior debe remitir al spec "Actualizar estado" la transición a "Mantenimiento".
 
 **Acceptance Scenarios**:
 
@@ -59,7 +59,7 @@ Como técnico de infraestructura identifico una falla en un galpón y necesito n
 - **FR-005**: El sistema DEBE capturar automáticamente la fecha y hora de generación de la alerta.
 - **FR-007**: El sistema DEBE impedir la creación de más de una alerta activa (estado "Pendiente") por galpón.
 - **FR-008**: El sistema DEBE mostrar un mensaje de confirmación antes de persistir la alerta.
-- **FR-009**: Si el técnico confirma, el sistema DEBE crear la alerta con estado "Pendiente", redirigir a la lista de galpones disponibles y mostrar mensaje de éxito.
+- **FR-009**: Si el técnico confirma, el sistema DEBE crear la alerta con estado "Pendiente", sin cambiar el estado del galpón; la atención de la alerta DEBE remitir al spec "Actualizar estado" la transición de "Disponible" a "Mantenimiento".
 - **FR-010**: Si el técnico cancela, el sistema NO DEBE crear la alerta.
 - **FR-011**: El sistema DEBE almacenar las alertas en un historial accesible para el administrador.
 - **FR-012**: El sistema DEBE mostrar errores claros si la descripción está vacía, el galpón no es válido o ya existe una alerta activa.
