@@ -1,111 +1,95 @@
-# Feature Specification: Registrar Lote 
-**Created** : 2026-09-01
+## Feature Specification: Registrar Lote
 
-#### User Scenarios & Testing  *(mandatory)*
+**Created**: 2026-09-04
 
-### User Story 1 - Registrar un Lote (Priority: P1)
+## User Scenarios & Testing
 
-Como Administrador de la Granja, quiero registrar un lote de pollos indicando la cantidad de pollos, el nombre, la fecha de ingreso y el costo del lote.
+### User Story 1 - Registro exitoso de un lote en galpón disponible (Priority: P1)
 
-**Why this priority**: Al registrarse un lote este permite obtener la información crucial para la operaciones del sistema como lo es el control de la dieta de los pollos (Modulo 2) y el calculo de la matriz de venta final (Modulo 3).
+Como administrado quiero poder registrar un nuevo lote de pollitos en un galpón. 
 
-**Independent Test** : Creación de un formulario donde el sistema solicita la fecha de ingreso, la población inicial, el costo del lote.
+**Why this priority**: Es el siguiente paso crítico después de registrar un galpón. Sin lotes no hay producción que gestionar, y este caso de uso permite el inicio de la crianza, activando el ciclo operativo del galpón.
 
-**Acceptance Scenarios** :
-1.  **Scenario** : Registro exitoso del lote
-   - **Given** el administrador intente registrar un lote
-   * **When** ingrese la población inicial, la fecha de ingreso, nombre y cuanto costó el lote
-   * **Then** el sistema genera un UUID único
-   * **And** el sistema le da a elegir un galpón disponible
-   * **And** el sistema debe almacenar el lote
+**Independent Test**: Puede probarse de forma aislada teniendo al menos un galpón en estado "Disponible" previamente registrado. El administrador accede al formulario, selecciona el galpón, ingresa datos válidos y verifica que el lote aparece en el listado, el galpón queda en estado "Productivo" y la población actual es igual a la inicial. No depende de otros módulos.
 
-2. **Scenario** : La población inicial de pollos supera el aforo máximo del galpón
-   - **Given** el administrador intente ingresar una población de pollos
-   * **When** la población de pollos es mayor al aforo máximo
-   * **Then** el sistema lanza una alerta 
-   * **And** el sistema permite ingresar un nuevo valor
+**Acceptance Scenarios**:
 
-3. **Scenario** : La fecha de ingreso posterior a la fecha actual
-   - **Given** el administrador intente ingresar una fecha de ingreso 
-   * **When** la fecha es posterior a la fecha actual del sistema
-   * **Then** el sistema lanza una alerta 
-   * **And** el sistema permite ingresar una nueva fecha
+1. **Scenario**: Registro de lote con datos válidos
+   - **Given** existe un galpón con estado "Disponible" y el administrador está en el formulario "Registrar lote"
+   - **When** selecciona el galpón disponible, ingresa un nombre único (ej. "Lote A1"), fecha de ingreso igual a la actual, población inicial 1000, costo 5000000 (COP) y envía el formulario
+   - **Then** el sistema crea el lote con esos datos, asigna población actual = 1000, cambia el galpón a estado "Productivo", y redirige al listado de lotes mostrando el lote recién creado
 
-4. **Scenario** : Población inicial igual a 0 o menor.
-   - **Given** el administrador intente ingresar la población inicial
-   * **When** el valor es menor o igual a 0
-   * **Then** el sistema lanza una alerta
-   * **And** el sistema permite ingresar una nueva población inicial
-   
-5. **Scenario** : Población inicial con valores inválidos
-   - **Given** el administrador intente ingresar la población inicial
-   * **When** el valor ingresado es decimal, letras o caracteres inválidos
-   * **Then** el sistema lanza una alerta
-   * **And** el sistema permite ingresar una nueva población inicial
+2. **Scenario**: Intento de registro con nombre duplicado
+   - **Given** ya existe un lote con nombre "Lote A1" en el sistema
+   - **When** el administrador intenta registrar otro lote con el nombre "Lote A1" (incluso con diferente capitalización)
+   - **Then** el sistema muestra un error de nombre duplicado y no crea el lote ni cambia el estado del galpón
 
-6. **Scenario**: Registro con nombre vacío
-   - **Given** El nombre está vacío o contiene únicamente espacios
-   - **When** el administrador intenta guardar el formulario
-   - **Then** el sistema rechaza el registro
-   - **And** muestra un mensaje indicando que el nombre es obligatorio
-### User Story 2 - Asignar lote a galpón (Priority: P2)
+3. **Scenario**: Intento de registro con fecha futura
+   - **Given** el administrador está en el formulario "Registrar lote" con un galpón disponible seleccionado
+   - **When** ingresa una fecha de ingreso posterior a la actual (ej. mañana) y envía el formulario
+   - **Then** el sistema muestra un error indicando que la fecha no puede ser futura y no crea el lote
 
-Como Administrador de la Granja, quiero poder ingresar un lote de pollos dentro de en un galpón.
+4. **Scenario**: Intento de registro con población inicial no válida
+   - **Given** el administrador está en el formulario "Registrar lote"
+   - **When** ingresa una población inicial que no es un entero positivo (ej. 0, -10, "cien", 10.5) y envía el formulario
+   - **Then** el sistema muestra un error de población inicial inválida y no crea el lote
 
-**Why this priority**: El lote debe estar alojado en un galpón, necesario para que el galpón pueda realizar su ciclo de vida (En cosecha o productivo).
+5. **Scenario**: Intento de registro con costo no válido
+   - **Given** el administrador está en el formulario "Registrar lote"
+   - **When** ingresa un costo que no es un entero positivo (ej. -500, 0, "mucho", 100.75) y envía el formulario
+   - **Then** el sistema muestra un error de costo inválido y no crea el lote
 
-**Independent Test** : Creación de una lista desplegable dentro del formulario donde se aparezcan los galpones disponibles.
+6. **Scenario**: Intento de seleccionar galpón no disponible
+   - **Given** existe un galpón en estado "Productivo" (ocupado) y el administrador accede al formulario de registro
+   - **When** el sistema muestra el listado de galpones para seleccionar
+   - **Then** el galpón ocupado no aparece en el listado (solo se muestran galpones "Disponibles")
 
-**Acceptance Scenarios** :
-1.  **Scenario** : Asignación de galpón exitoso.
-   - **Given** el administrador intente elegir un lote
-   * **When** elige un galpón
-   * **Then** el sistema debe guardar el UUID del galpón en los atributos del lote
-   * **And** el sistema debe almacenar el lote
-   
-### Edge Cases
-
-¿Qué pasa si dos usuarios intentan registrar un lote al mismo tiempo sobre el mismo galpón? → El sistema debe procesar la primera transacción y bloquear de inmediato la segunda, arrojando un error de concurrencia ya que el estado pasa a productivo en la primera confirmación.
-
-¿Qué pasa si se da un error durante el guardado? → El sistema debe informar que no fue posible guardar el lote y conservar los datos introducidos para permitir un nuevo intento.
-
-¿Qué pasa si el usuario abandona el formulario? →  El sistema no debe crear ningún lote mientras el usuario no confirme el guardado.
-
-¿Qué pasa si hay fallo en la generación del UUID? →  El sistema debe cancelar la creación, informar el error y no guardar un galpón sin identificador único.
-
-### Requirements  *(mandatory)*
-
- **Functional Requirements**
-*   **FR-001** : El sistema DEBE generar automáticamente un identificador único universal (UUID) en cada registro exitoso.
-*   **FR-002** : El sistema DEBE verificar que el galpón exista en la base de datos y que su estado actual sea estrictamente disponible antes de procesar el registro del lote.
-*   **FR-003** : El sistema DEBE bloquear cualquier registro donde la población inicial sea superior al aforo máximo del galpón.
-*   **FR-004** : El sistema DEBE cambiar el estado actual del galpón a productivo inmediatamente después de registrar el lote de forma exitosa en la base de datos de manera atómica.
-*   **FR-007** : El sistema debe permitir que un usuario con rol de Administrador registre lotes de forma retroactiva (por ejemplo, con fecha de ingreso del día anterior si hubo retrasos en el reporte)
-
-##### Key Entities  *(include if feature involves data)*
-*   **Lote**: Representa el conjunto biológico de pollos alojado en un galpón específico durante un ciclo productivo cerrado.
-    *  Identificador único.
-    *  Identificador único del galpón.
-    *  Nombre.
-    *  Fecha de ingreso.
-    *  Población inicial.
-    *  Población actual.
-    
-*   **Galpón**: Se incluye porque actúa como el registro maestro o de referencia que debe existir previamente para poder persistir el lote.
-    * UUID único
-	- Nombre
-	- Aforo máximo
-	- Estado (Disponible, vaciado sanitario, productivo, en cosecha, mantenimiento, aislamiento)
-
-- **Administrador de granja**: Usuario autorizado para registrar y administrar galpones.
 ---
 
-#### Success Criteria  *(mandatory)*
+### Edge Cases
 
-##### Measurable Outcomes
-*  **SC-001** : El 100% de los lotes registrados deben quedar asociados a galpones físicos en estado disponible.
-*  **SC-002** : El cambio de estado del galpón de disponible a productivo tras el registro debe ejecutarse de forma atómica bajo una transacción única de base de datos en menos de 150ms.
-- **SC-003**: El 100 % de los lotes creados debe recibir un UUID único.
-- **SC-004**: El 100 % de los errores de validación debe mostrar un mensaje claro y específico para que el administrador pueda corregir el campo correspondiente.
-- **SC-005**: El 100 % de los errores durante el guardado debe conservar los datos ingresados para permitir un nuevo intento.
-- **SC-006**: Ningún lote debe guardarse sin una fecha valida y una población valida.
+- ¿Qué sucede si el administrador intenta registrar un lote con un nombre que difiere solo en mayúsculas/minúsculas? Se debe validar unicidad sin distinguir mayúsculas/minúsculas (case-insensitive).
+- ¿Qué sucede si se reciben espacios en blanco al inicio o final del nombre? El sistema debe recortar los espacios antes de validar unicidad y longitud.
+- ¿Qué sucede si el costo es extremadamente grande (ej. 999999999999)? Dado que se usa entero, debe soportar valores grandes (64 bits). No hay límite superior especificado.
+- ¿Qué sucede si el administrador intenta manipular el formulario para enviar un galpón que no está en estado "Disponible"? El sistema debe validar en el servidor y rechazar la operación.
+- ¿Cómo maneja el sistema una fecha de ingreso pasada? Se permite, siempre que no sea futura. No hay límite de cuán atrás en el tiempo puede estar, asumiendo que es por problemas de conexión o registro tardío.
+- ¿El campo costo acepta decimales? Según indicación, se decidió usar enteros (pesos colombianos sin centavos), por lo que no se aceptan decimales.
+- ¿Qué pasa si el administrador intenta registrar un lote sin seleccionar galpón? El formulario debe requerir selección obligatoria.
+
+## Requirements
+
+### Functional Requirements
+
+- **FR-001**: El sistema DEBE permitir al administrador registrar un lote proporcionando nombre, fecha de ingreso, población inicial, costo y seleccionando un galpón.
+- **FR-002**: El sistema DEBE mostrar únicamente galpones en estado "Disponible" en el listado de selección al momento de registrar un lote.
+- **FR-003**: El sistema DEBE validar que el galpón seleccionado esté en estado "Disponible" antes de crear el lote.
+- **FR-004**: El sistema DEBE validar que el nombre del lote sea único en el sistema, sin distinguir mayúsculas/minúsculas.
+- **FR-005**: El sistema DEBE validar que el nombre no esté vacío, tenga una longitud máxima de 100 caracteres y solo contenga letras, números, espacios, guiones y guiones bajos.
+- **FR-006**: El sistema DEBE validar que la población inicial sea un número entero positivo (mayor que cero).
+- **FR-007**: El sistema DEBE validar que el costo sea un número entero positivo (mayor que cero) en pesos colombianos.
+- **FR-008**: El sistema DEBE validar que la fecha de ingreso no sea una fecha futura.
+- **FR-009**: El sistema DEBE asignar automáticamente la población actual igual a la población inicial al crear el lote.
+- **FR-010**: El sistema DEBE cambiar automáticamente el estado del galpón a "Productivo" al registrar exitosamente el lote.
+- **FR-011**: El sistema DEBE asignar un UUID único al lote al crearlo.
+- **FR-012**: El sistema DEBE persistir el lote en la base de datos y actualizar el estado del galpón de forma atómica.
+- **FR-013**: Tras el registro exitoso, el sistema DEBE redirigir al administrador al listado de lotes, mostrando el lote recién creado.
+- **FR-014**: El sistema DEBE mostrar mensajes de error claros si el nombre está duplicado, la fecha es futura, la población inicial o el costo no son enteros positivos, o el galpón no está disponible.
+
+### Key Entities
+
+- **Lote**: Representa un grupo de pollitos de engorde alojados en un galpón.
+  - Atributos: ID (UUID), Nombre (texto único), Fecha de ingreso (timestamp), Población inicial (entero positivo), Población actual (entero positivo, inicialmente igual a la inicial), Costo (entero positivo en COP), Galpón (FK no editable después de creación).
+  - Relaciones: Pertenece a un Galpón (muchos a uno, pero un galpón solo puede tener un lote activo a la vez).
+
+- **Galpón**: Entidad existente que cambia de estado al registrar un lote.
+  - Atributos relevantes: ID (UUID), Estado actual (enum).
+
+## Success Criteria
+
+### Measurable Outcomes
+
+- **SC-001**: El administrador puede completar el registro de un lote en menos de 2 minutos (excluyendo tiempo de carga).
+- **SC-002**: El 100% de los lotes registrados cumplen con las validaciones de nombre único, fecha no futura, población inicial y costo enteros positivos.
+- **SC-003**: El 100% de los registros exitosos cambian el estado del galpón a "Productivo" y asignan población actual igual a la inicial.
+- **SC-004**: El sistema impide la selección de galpones no disponibles en el formulario de registro (0% de intentos exitosos con galpón no disponible).
+- **SC-005**: El 95% de los registros exitosos redirigen correctamente al listado de lotes sin errores.
